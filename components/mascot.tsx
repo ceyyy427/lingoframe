@@ -1,16 +1,18 @@
-export function Mascot({ variant = "fox", size = 150 }: { variant?: "fox" | "bear"; size?: number }) {
-  const bear = variant === "bear";
-  return <div className={`mascot mascot-${variant}`} aria-label={bear ? "Cartoon bear mascot" : "Cartoon fox mascot"} role="img">
+export function Mascot({ variant = "pig", size = 150 }: { variant?: "pig"; size?: number }) {
+  return <div className="mascot mascot-pig" aria-label="Cute pink pig mascot" role="img">
     <svg width={size} height={size} viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="80" cy="82" r="62" fill={bear ? "#D6A26E" : "#F2A65A"} />
-      <path d={bear ? "M34 53C20 48 21 26 40 29L56 43M126 53C140 48 139 26 120 29L104 43" : "M35 54L29 18L61 39M125 54L131 18L99 39"} fill={bear ? "#C58C5A" : "#E6843D"} stroke="#17231F" strokeWidth="5" strokeLinejoin="round" />
-      <ellipse cx="80" cy="91" rx="39" ry="32" fill="#FFE8C6" />
+      <path d="M44 49C26 48 23 28 31 21C40 14 53 24 58 39M116 49C134 48 137 28 129 21C120 14 107 24 102 39" fill="#F5A8BB" stroke="#17231F" strokeWidth="5" strokeLinejoin="round" />
+      <path d="M31 22C39 20 47 27 50 39L38 36Z" fill="#F784A3" />
+      <path d="M129 22C121 20 113 27 110 39L122 36Z" fill="#F784A3" />
+      <circle cx="80" cy="82" r="62" fill="#F7A9BE" stroke="#17231F" strokeWidth="5" />
+      <ellipse cx="80" cy="98" rx="42" ry="33" fill="#FFD4DF" stroke="#17231F" strokeWidth="4" />
       <circle cx="59" cy="76" r="6" fill="#17231F" /><circle cx="101" cy="76" r="6" fill="#17231F" />
-      <path d="M74 92C78 96 82 96 86 92" stroke="#17231F" strokeWidth="4" strokeLinecap="round" />
-      <path d="M80 96V103" stroke="#17231F" strokeWidth="4" strokeLinecap="round" />
-      <path d="M57 99C48 98 43 96 38 93M103 99C112 98 117 96 122 93" stroke="#17231F" strokeWidth="3" strokeLinecap="round" />
-      <path d="M62 122C69 133 91 133 98 122" stroke="#235C4F" strokeWidth="7" strokeLinecap="round" />
-      <circle cx="37" cy="101" r="5" fill="#F17B6D" opacity=".7" /><circle cx="123" cy="101" r="5" fill="#F17B6D" opacity=".7" />
+      <ellipse cx="80" cy="98" rx="19" ry="14" fill="#F58EAA" stroke="#17231F" strokeWidth="4" />
+      <ellipse cx="73" cy="98" rx="3.5" ry="5" fill="#17231F" /><ellipse cx="87" cy="98" rx="3.5" ry="5" fill="#17231F" />
+      <path d="M80 105C77 111 72 112 68 109M80 105C83 111 88 112 92 109" stroke="#17231F" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M57 104C48 102 43 99 38 95M103 104C112 102 117 99 122 95" stroke="#D65F82" strokeWidth="3" strokeLinecap="round" opacity=".75" />
+      <path d="M61 126C69 137 91 137 99 126" stroke="#235C4F" strokeWidth="7" strokeLinecap="round" />
+      <circle cx="39" cy="105" r="6" fill="#F47F9F" opacity=".8" /><circle cx="121" cy="105" r="6" fill="#F47F9F" opacity=".8" />
     </svg>
   </div>;
 }
