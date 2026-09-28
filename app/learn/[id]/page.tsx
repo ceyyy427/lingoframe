@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LessonStatus } from "@/components/lesson-status";
 import { LessonPlayer } from "@/components/lesson-player";
 
+export const dynamic = "force-dynamic";
+
 export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ReviewQueue } from "@/components/review-queue";
 
+export const dynamic = "force-dynamic";
+
 export default async function TodayReviewPage() {
   const supabase = await createSupabaseServerClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) redirect("/auth/login");
   const { data: sentences } = await supabase.from("lesson_sentences").select("id,original_text,translation,review_count,correct_streak,next_review_at,lessons!inner(user_id)").eq("lessons.user_id", user.id).or(`next_review_at.is.null,next_review_at.lte.${new Date().toISOString()}`).order("next_review_at", { ascending:true, nullsFirst:true }).limit(10);

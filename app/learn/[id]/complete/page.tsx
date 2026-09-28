@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function CompletionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; const supabase = await createSupabaseServerClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) notFound();
   const { data: lesson } = await supabase.from("lessons").select("id,title,lesson_sentences(completed_at,is_difficult)").eq("id", id).eq("user_id", user.id).single(); if (!lesson) notFound();
