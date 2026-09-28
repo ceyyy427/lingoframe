@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { nextReviewAt, nextStreak } from "@/lib/review/schedule";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 function normalize(value: string) { return value.toLowerCase().replace(/[^a-z0-9\s']/g, "").replace(/\s+/g, " ").trim(); }
 function compareWords(a: string, b: string) { const left = normalize(a).split(" "); const right = normalize(b).split(" "); const missing = left.filter((word, index) => word !== right[index]); const extra = right.filter((word, index) => word !== left[index]); const common = left.filter((word, index) => word === right[index]).length; return { score: Math.round((common / Math.max(left.length, right.length, 1)) * 100), missing, extra }; }
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const limit = rateLimit(`practice:${user.id}`, 30, 10 * 60 * 1000); if (!limit.allowed) return NextResponse.json({ error: "Too many practice attempts. Please try again later." }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
   const form = await request.formData(); const audio = form.get("audio"); const sentenceId = String(form.get("sentenceId") ?? "");
   if (!(audio instanceof File) || !sentenceId) return NextResponse.json({ error: "audio and sentenceId are required" }, { status: 400 });
   if (audio.size === 0 || !audio.type.startsWith("audio/") || audio.size > 10 * 1024 * 1024) return NextResponse.json({ error: "Audio must be a non-empty audio file smaller than 10 MB." }, { status: 400 });

@@ -37,7 +37,7 @@ export class AuthorizedTranscriptProvider implements TranscriptProvider {
   }
 }
 
-function parseVtt(vtt: string): TranscriptSegment[] {
+export function parseVtt(vtt: string): TranscriptSegment[] {
   const blocks = vtt.split(/\r?\n\s*\r?\n/); const output: TranscriptSegment[] = []; let last = "";
   for (const block of blocks) {
     const lines = block.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);

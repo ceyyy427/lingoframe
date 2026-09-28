@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { identifyVideo } from "@/lib/video/provider";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 const lessonInput = z.object({ url: z.string().trim().url().max(2048) });
 
@@ -16,6 +17,9 @@ export async function POST(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please sign in before creating a lesson." }, { status: 401 });
+    const limit = rateLimit(`lesson:${user.id}`, 5, 60 * 60 * 1000); if (!limit.allowed) return NextResponse.json({ error: "You have reached the hourly lesson limit. Please try again later." }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
+    const { data: duplicate } = await supabase.from("lessons").select("id,status,source_videos!inner(url)").eq("user_id", user.id).eq("source_videos.url", url).in("status", ["processing", "ready"]).limit(1).maybeSingle();
+    if (duplicate) return NextResponse.json({ lessonId: duplicate.id, status: duplicate.status, duplicate: true }, { status: 200 });
     const { data: video, error: videoError } = await supabase.from("source_videos").insert({ platform: source.platform, external_video_id: source.externalId, url: source.url }).select("id").single();
     if (videoError) throw videoError;
     const { data: lesson, error: lessonError } = await supabase.from("lessons").insert({ user_id: user.id, source_video_id: video.id, title: `Lesson from ${source.platform}`, status: "processing", processing_stage: "queued", attempts: 0 }).select("id").single();
