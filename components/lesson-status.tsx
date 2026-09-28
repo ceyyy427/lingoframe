@@ -1,0 +1,12 @@
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+const labels: Record<string, string> = { queued: "排队等待处理", fetching_captions: "正在获取字幕", analyzing: "正在分析句子", saving: "正在保存课程", complete: "课程已完成", failed: "处理失败" };
+export function LessonStatus({ lessonId, initialStage, initialStatus, initialError }: { lessonId: string; initialStage: string; initialStatus: string; initialError?: string | null }) {
+  const [state, setState] = useState({ stage: initialStage, status: initialStatus, error: initialError ?? "" }); const [retrying, setRetrying] = useState(false);
+  useEffect(() => { if (state.status !== "processing") return; const supabase = createSupabaseBrowserClient(); const apply = (next: { processing_stage:string; status:string; error_message?:string|null }) => { setState({ stage: next.processing_stage, status: next.status, error: next.error_message ?? "" }); if (next.status === "ready") window.location.reload(); }; const channel = supabase.channel(`lesson-status-${lessonId}`).on("postgres_changes", { event:"UPDATE", schema:"public", table:"lessons", filter:`id=eq.${lessonId}` }, (payload) => apply(payload.new as {processing_stage:string;status:string;error_message?:string|null})).subscribe(); const timer = setInterval(async () => { const response = await fetch(`/api/lessons/${lessonId}`, { cache: "no-store" }); if (response.ok) apply(await response.json()); }, 5000); return () => { clearInterval(timer); void supabase.removeChannel(channel); }; }, [lessonId, state.status]);
+  async function retry() { setRetrying(true); const response = await fetch(`/api/lessons/${lessonId}`, { method:"POST" }); if (response.ok) setState({ stage:"queued",status:"processing",error:"" }); setRetrying(false); }
+  return <article className="feature" style={{maxWidth:640,marginTop:36}}><div className="eyebrow">Lesson processing</div><h2 style={{fontSize:32,margin:"12px 0"}}>{labels[state.stage] ?? "正在处理"}</h2>{state.status === "processing"&&<p>你可以离开这个页面，稍后回到课程继续学习。页面会自动刷新。</p>}{state.status === "failed"&&<><p style={{color:"#b13a35"}}>{state.error || "课程处理失败。"}</p><button className="button" disabled={retrying} onClick={retry}>{retrying?"Retrying…":"Retry lesson"}</button></>}{state.status === "ready"&&<Link className="button" href={`/learn/${lessonId}`}>Open lesson →</Link>}</article>;
+}
